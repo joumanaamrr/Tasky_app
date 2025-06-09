@@ -1,58 +1,140 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:tasky/AddTaskScreen.dart';
-import 'package:tasky/LoginScreen.dart';
-import 'package:tasky/TasksScreen.dart';
-
+import 'package:provider/provider.dart';
+import 'package:tasky/Services/theme_notifier.dart';
+import 'package:tasky/add_task_screen.dart';
+import 'package:tasky/completed_tasks_screen.dart';
+import 'package:tasky/home_screen.dart';
+import 'package:tasky/login_screen.dart';
+import 'package:tasky/profile_screen.dart';
+import 'package:tasky/tasks_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky/todotasks_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeNotifier(),
+      child: const MyAppWrapper(),
+    ),
+  );
+}
+
+class MyAppWrapper extends StatefulWidget {
+  const MyAppWrapper({super.key});
+
+  @override
+  State<MyAppWrapper> createState() => _MyAppWrapperState();
+}
+
+class _MyAppWrapperState extends State<MyAppWrapper> {
+  String? username;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUsername();
+  }
+
+  Future<void> loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+    return MyApp(username: username);
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+ final String ? username;
+  const MyApp({super.key,required this.username});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style:ElevatedButton.styleFrom(
-            fixedSize:Size(343,40),
-            backgroundColor: Color(0xff15B86C)
-          )
-        ),
-        scaffoldBackgroundColor: Color(0xff181818),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        textTheme: TextTheme(
-          displayMedium: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w400,
-            color: Color(0xffFFFFFF),
-          ),
-          displayLarge: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w400,
-            color: Color(0xffFFFCFC),
-          ),
-          displaySmall: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: Color(0xffFFFCFC),
-
-          )
-          )
-
-     ),
-   initialRoute:AddTaskScreen.Routname,
+       theme:lightTheme,
+        darkTheme: darkTheme,
+        // ThemeData(
+     //    elevatedButtonTheme: ElevatedButtonThemeData(
+     //      style:ElevatedButton.styleFrom(
+     //        fixedSize:Size(343,40),
+     //        backgroundColor: Color(0xff15B86C)
+     //      )
+     //    ),
+     //
+     //    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+     //      backgroundColor: Color(0xff181818),
+     //      type: BottomNavigationBarType.fixed,
+     //      selectedItemColor: Color(0xff15B86C),
+     //      unselectedItemColor: Color(0xffC6C6C6),
+     //
+     //    ),
+     //      switchTheme: SwitchThemeData(
+     //        trackColor: MaterialStateProperty.resolveWith<Color>(
+     //              (Set<MaterialState> states) {
+     //            if (states.contains(MaterialState.selected)) {
+     //              return Color(0xff15B86C); // Custom green track when ON
+     //            }
+     //            return Colors.grey.withOpacity(0.5); // Grey track when OFF
+     //          },
+     //        ),
+     //      ),
+     //
+     //
+     //
+     //      scaffoldBackgroundColor: Color(0xff181818),
+     //    colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff15B86C)),
+     //    useMaterial3: true,
+     //    textTheme: TextTheme(
+     //      displayMedium: TextStyle(
+     //        fontSize: 28,
+     //        fontWeight: FontWeight.w400,
+     //        color: Color(0xffFFFFFF),
+     //      ),
+     //      displayLarge: TextStyle(
+     //        fontSize: 24,
+     //        fontWeight: FontWeight.w400,
+     //        color: Color(0xffFFFCFC),
+     //      ),
+     //      displaySmall: TextStyle(
+     //        fontSize: 16,
+     //        fontWeight: FontWeight.w400,
+     //        color: Color(0xffFFFCFC),
+     //
+     //      )
+     //      )
+     //
+     // ),
+      themeMode: themeNotifier.currentTheme,
+        home:LoginScreen(),
       routes: {
          LoginScreen.Routname:(context)=>LoginScreen(),
-        AddTaskScreen.Routname:(context)=>AddTaskScreen(),
+        AddTaskScreen.Routname:(context)=>HomeScreen(),
         TasksScreen.Routname:(context)=>TasksScreen(),
+        CompletedTasks.Routname:(context)=>CompletedTasks(),
+        ProfileScreen.Routname:(context)=>ProfileScreen(),
+        Todotasks.Routname:(context)=>Todotasks(),
+
       },
+
 
     );
   }
@@ -145,3 +227,119 @@ class MyApp extends StatelessWidget {
 //     );
 //   }
 // }
+final ThemeData darkTheme = ThemeData(
+  useMaterial3: true,
+  scaffoldBackgroundColor: Color(0xff181818),
+  colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff15B86C), brightness: Brightness.dark),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      fixedSize: Size(343, 40),
+      backgroundColor: Color(0xff15B86C),
+    ),
+  ),
+  inputDecorationTheme: InputDecorationTheme(
+    filled: true,
+    fillColor: Color(0xff282828), // Same dark card background
+    contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade700),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade700),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Color(0xff15B86C), width: 2),
+    ),
+    hintStyle: TextStyle(color: Colors.grey.shade400),
+    labelStyle: TextStyle(color: Colors.white),
+  ),
+
+
+
+  appBarTheme: AppBarTheme(
+    color: Color(0xff181818),
+  ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: Color(0xff181818),
+    type: BottomNavigationBarType.fixed,
+    selectedItemColor: Color(0xff15B86C),
+    unselectedItemColor: Color(0xffC6C6C6),
+  ),
+  switchTheme: SwitchThemeData(
+    trackColor: MaterialStateProperty.resolveWith<Color>(
+          (Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return Color(0xff15B86C);
+        }
+        return Colors.grey.withOpacity(0.5); // Grey track when OFF
+      },
+    ),
+    thumbColor: MaterialStateProperty.resolveWith<Color>(
+          (Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Colors.grey.shade400;
+        }
+        return Colors.white; // Always white thumb (ON or OFF)
+      },
+    ),
+  ),
+
+
+  textTheme: TextTheme(
+    displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w400, color: Colors.white),
+    displayLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white),
+    displaySmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white),
+  ),
+);
+
+final ThemeData lightTheme = ThemeData(
+  useMaterial3: true,
+  scaffoldBackgroundColor: Colors.white,
+  colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff15B86C), brightness: Brightness.light),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      fixedSize: Size(343, 40),
+      backgroundColor: Color(0xff15B86C),
+    ),
+  ),
+  inputDecorationTheme: InputDecorationTheme(
+    filled: true,
+    fillColor: Colors.white, // White background
+    contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Color(0xff15B86C), width: 2),
+    ),
+    hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
+    labelStyle: TextStyle(color: Colors.black),
+  ),
+
+
+
+  appBarTheme: AppBarTheme(
+    color: Colors.white
+  ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: Colors.white,
+    type: BottomNavigationBarType.fixed,
+    selectedItemColor: Color(0xff15B86C),
+    unselectedItemColor: Colors.grey,
+  ),
+
+  textTheme: TextTheme(
+    displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w400, color: Colors.black),
+    displayLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.black),
+    displaySmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
+  ),
+);

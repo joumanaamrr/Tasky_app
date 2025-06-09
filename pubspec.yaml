@@ -27,10 +27,20 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+flutter_native_splash:
+   color: "#ffffff"
+   image: assets/images/splashscreen.png # your splash image path
+
 dependencies:
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.7
+  shared_preferences: ^2.1.1
+  percent_indicator: ^4.2.2
+  streaming_shared_preferences: ^2.0.0
+  image_picker: ^1.0.4
+  provider: ^6.1.0
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -71,6 +81,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
+
+
   assets:
     - assets/images/check.svg
     - assets/images/taskytext.png
@@ -78,6 +90,7 @@ flutter:
     - assets/images/backgroundd.svg
     - assets/images/Thumbnail.jpg
     - assets/images/Icon.svg
+    - assets/images/splashscreen.png
   #   - images/a_dot_ham.jpeg
 
 
@@ -106,3 +119,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
